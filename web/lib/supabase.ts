@@ -124,9 +124,13 @@ export async function listEvents(): Promise<NyotaEvent[]> {
 }
 
 export async function createEvent(name: string, eventDate: string | null): Promise<NyotaEvent> {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) throw new Error('Not signed in');
+
   const { data, error } = await supabase
     .from('events')
-    .insert({ name, event_date: eventDate })
+    .insert({ owner_id: uid, name, event_date: eventDate })
     .select('*')
     .single();
   if (error) throw error;
@@ -176,6 +180,10 @@ export async function saveFoodOnly(
   amount: number,
   guestName?: string
 ): Promise<string> {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) throw new Error('Not signed in');
+
   const clientId = crypto.randomUUID();
   const { data, error } = await supabase
     .from('guest_entries')
@@ -183,6 +191,7 @@ export async function saveFoodOnly(
       {
         client_id: clientId,
         event_id: eventId,
+        owner_id: uid,
         category: 'food_only',
         guest_name: guestName?.trim() ? guestName.trim() : null,
         cash_amount: amount,
@@ -205,6 +214,10 @@ export async function saveNyotaEntry(
     gifts: GiftPayload[];
   }
 ): Promise<string> {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+  if (!uid) throw new Error('Not signed in');
+
   const clientId = crypto.randomUUID();
   const { data, error } = await supabase
     .from('guest_entries')
@@ -212,6 +225,7 @@ export async function saveNyotaEntry(
       {
         client_id: clientId,
         event_id: eventId,
+        owner_id: uid,
         category: 'nyota_gifts',
         guest_name: input.guestName?.trim() ? input.guestName.trim() : null,
         father_name: input.fatherName?.trim() ? input.fatherName.trim() : null,
@@ -231,9 +245,13 @@ export async function saveNyotaEntry(
 }
 
 export async function addGiftsToEntry(entryId: string, gifts: GiftPayload[]) {
+  const { data: userData } = await supabase.auth.getUser();
+  const uid = userData.user?.id;
+
   const { error } = await supabase.from('gifts').insert(
     gifts.map((g) => ({
       entry_id: entryId,
+      owner_id: uid,
       name: g.name,
       description: g.description ?? null,
       image_path: g.image_path ?? null,
