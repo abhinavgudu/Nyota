@@ -100,8 +100,27 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Column(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(28),
-                      child: Image.asset('assets/logo.png', width: 148, height: 148),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: NyotaColors.border),
+                          boxShadow: [
+                            BoxShadow(
+                              color: NyotaColors.royalPurple.withValues(alpha: 0.12),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: 280,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     const Text(

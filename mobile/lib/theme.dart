@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-/// Nyota brand colors.
+/// Nyota brand colours — taken from the logo (deep maroon + gold + cream).
 class NyotaColors {
-  static const royalPurple = Color(0xFF6C3CE9);
-  static const deepIndigo = Color(0xFF4338CA);
-  static const saffron = Color(0xFFF59E0B);
-  static const cream = Color(0xFFFFF9EF);
-  static const ink = Color(0xFF1E1B2E);
-  static const muted = Color(0xFF6B6880);
+  /// Primary brand maroon (the "Nyota" wordmark / crown).
+  static const royalPurple = Color(0xFF7B1119);
+  /// Deeper maroon shade for headers and pressed states.
+  static const deepIndigo = Color(0xFF5A0A10);
+  /// Metallic gold accent (floral motifs, highlights).
+  static const saffron = Color(0xFFC8931F);
+  /// Warm cream page background.
+  static const cream = Color(0xFFFBF3DC);
+  /// Deep brown-black text.
+  static const ink = Color(0xFF3A1210);
+  /// Warm muted text.
+  static const muted = Color(0xFF7B6157);
   static const success = Color(0xFF16A34A);
-  static const danger = Color(0xFFDC2626);
+  static const danger = Color(0xFFC0392B);
+  /// Light gold used for borders / soft fills.
+  static const goldSoft = Color(0xFFE8C46A);
+  static const border = Color(0xFFE9DCC0);
 }
 
 class NyotaTheme {
@@ -32,6 +42,11 @@ class NyotaTheme {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20,
@@ -73,11 +88,11 @@ class NyotaTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE5E1F0)),
+          borderSide: const BorderSide(color: NyotaColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE5E1F0)),
+          borderSide: const BorderSide(color: NyotaColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

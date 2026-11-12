@@ -126,7 +126,9 @@ The values are injected at build/run time via `--dart-define-from-file`; **do no
 
 ## Design system
 
-Royal Purple `#6C3CE9` · Deep Indigo `#4338CA` · Saffron/Gold `#F59E0B` · Soft Cream `#FFF9EF` · white cards with subtle shadows. The provided Nyota logo is used on the login screen, app bar, top bar and as the favicon/app label.
+Brand colours are sampled directly from the Nyota logo: **Deep Maroon `#7B1119`** (primary — crown, wordmark, app bar) · **Deeper Maroon `#5A0A10`** (headers/pressed) · **Gold `#C8931F`** (accents, gold buttons, topbar underline) · **Soft Gold `#E8C46A`** · **Cream `#FBF3DC`** (page background) · **Ink `#3A1210`** (text) · **Warm Muted `#7B6157`** · **Border `#E9DCC0`** · white rounded cards with soft shadows.
+
+Assets: `mobile/assets/logo.png` (full logo, used on the sign-in screen) and `mobile/assets/logo_mark.png` / `web/public/logo_mark.png` + `icon.png` (square crown-lotus mark used in the app bar, top bar and as the favicon/app icon).
 
 ## Financial correctness (why totals are right)
 

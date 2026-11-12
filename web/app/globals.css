@@ -1,13 +1,16 @@
 :root {
-  --purple: #6c3ce9;
-  --indigo: #4338ca;
-  --saffron: #f59e0b;
-  --cream: #fff9ef;
-  --ink: #1e1b2e;
-  --muted: #6b6880;
-  --border: #e5e1f0;
+  /* Nyota brand palette — taken from the logo (deep maroon + gold + cream) */
+  --purple: #7b1119;
+  --deep-maroon: #5a0a10;
+  --indigo: #8a5a12;
+  --saffron: #c8931f;
+  --cream: #fbf3dc;
+  --ink: #3a1210;
+  --muted: #7b6157;
+  --border: #e9dcc0;
   --success: #16a34a;
-  --danger: #dc2626;
+  --danger: #c0392b;
+  --gold-soft: #e8c46a;
 }
 
 * {
@@ -31,7 +34,7 @@ a {
 /* ---------- Shared UI ---------- */
 
 .topbar {
-  background: var(--purple);
+  background: linear-gradient(180deg, var(--purple) 0%, var(--deep-maroon, #5a0a10) 100%);
   color: #fff;
   display: flex;
   align-items: center;
@@ -40,6 +43,7 @@ a {
   position: sticky;
   top: 0;
   z-index: 20;
+  border-bottom: 3px solid var(--saffron);
 }
 
 .topbar img {
@@ -80,7 +84,7 @@ a {
 .card {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(30, 27, 46, 0.07);
+  box-shadow: 0 2px 10px rgba(58, 18, 16, 0.07);
   padding: 16px;
 }
 
@@ -111,7 +115,7 @@ a {
 .field input:focus,
 .field textarea:focus {
   border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(108, 60, 233, 0.12);
+  box-shadow: 0 0 0 3px rgba(123, 17, 25, 0.12);
 }
 
 .btn {
@@ -142,6 +146,7 @@ a {
 
 .btn.gold {
   background: var(--saffron);
+  color: #3a1210;
 }
 
 .btn.danger {
@@ -163,12 +168,12 @@ a {
 }
 
 .chip.nyota {
-  background: rgba(108, 60, 233, 0.1);
+  background: rgba(123, 17, 25, 0.10);
   color: var(--purple);
 }
 
 .chip.food {
-  background: rgba(67, 56, 202, 0.1);
+  background: rgba(200, 147, 31, 0.15);
   color: var(--indigo);
 }
 
@@ -213,7 +218,7 @@ a {
 .stat-card {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(30, 27, 46, 0.07);
+  box-shadow: 0 2px 10px rgba(58, 18, 16, 0.07);
   padding: 16px;
 }
 
@@ -292,7 +297,7 @@ a {
   background: var(--purple);
   color: #fff;
   border-color: var(--purple);
-  box-shadow: 0 3px 10px rgba(108, 60, 233, 0.3);
+  box-shadow: 0 3px 10px rgba(123, 17, 25, 0.30);
 }
 
 .total-row {
@@ -308,7 +313,7 @@ a {
 
 .total-row.hot {
   border-color: var(--purple);
-  background: rgba(108, 60, 233, 0.07);
+  background: rgba(123, 17, 25, 0.07);
 }
 
 .total-row .amount {
@@ -322,7 +327,7 @@ a {
 .entry-card {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(30, 27, 46, 0.07);
+  box-shadow: 0 2px 10px rgba(58, 18, 16, 0.07);
   padding: 14px 16px;
   margin-bottom: 10px;
   cursor: pointer;
@@ -405,7 +410,7 @@ a {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(30, 27, 46, 0.45);
+  background: rgba(58, 18, 16, 0.50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -447,18 +452,21 @@ a {
 .auth-card {
   background: #fff;
   border-radius: 20px;
-  box-shadow: 0 6px 24px rgba(30, 27, 46, 0.08);
+  box-shadow: 0 6px 24px rgba(58, 18, 16, 0.08);
   padding: 32px;
   width: 100%;
   max-width: 400px;
 }
 
 .auth-card img {
-  width: 120px;
-  height: 120px;
-  border-radius: 26px;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  border-radius: 18px;
   display: block;
-  margin: 0 auto 12px;
+  margin: 0 auto 14px;
+  border: 1px solid var(--border);
+  background: #fff;
 }
 
 .auth-card h1 {

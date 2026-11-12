@@ -58,7 +58,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     <>
       <header className="topbar">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="Nyota logo" />
+        <img src="/logo_mark.png" alt="Nyota logo" />
         <span className="brand">Nyota</span>
         <span className="spacer" />
         <nav style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

@@ -43,7 +43,7 @@ function JoinByCodeInner() {
     <div className="auth-wrap">
       <div className="auth-card" style={{ maxWidth: 440, textAlign: 'center' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="Nyota" style={{ width: 90, height: 90, borderRadius: 22, margin: '0 auto 10px' }} />
+        <img src="/logo_mark.png" alt="Nyota" style={{ width: 90, height: 90, borderRadius: 22, margin: '0 auto 10px' }} />
         <h1 style={{ marginBottom: 6 }}>Join Event</h1>
         {status === 'checking' && <p style={{ color: 'var(--muted)' }}>Checking…</p>}
         {status === 'need-auth' && <p style={{ color: 'var(--muted)' }}>Login required — redirecting…</p>}

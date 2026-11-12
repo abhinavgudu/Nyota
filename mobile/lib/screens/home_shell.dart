@@ -30,8 +30,8 @@ class _HomeShellState extends State<HomeShell> {
         title: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset('assets/logo.png', width: 34, height: 34),
+              borderRadius: BorderRadius.circular(9),
+              child: Image.asset('assets/logo_mark.png', width: 34, height: 34),
             ),
             const SizedBox(width: 10),
             const Text('Nyota'),
