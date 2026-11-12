@@ -124,9 +124,10 @@ class _FoodOnlyTabState extends State<FoodOnlyTab>
       setState(() => _saving = false);
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(
+        ..showSnackBar(SnackBar(
           backgroundColor: NyotaColors.danger,
-          content: Text('Could not save entry. Check connection and try again.'),
+          duration: const Duration(seconds: 6),
+          content: Text('Could not save entry: $e'),
         ));
     }
   }

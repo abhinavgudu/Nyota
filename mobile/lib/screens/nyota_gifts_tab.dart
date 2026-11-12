@@ -167,7 +167,7 @@ class _NyotaGiftsTabState extends State<NyotaGiftsTab>
         ));
       widget.onSaved?.call();
     } catch (e) {
-      _showError('Could not save entry. Please try again.');
+      _showError('Could not save entry: $e');
       if (mounted) setState(() => _saving = false);
     }
   }
