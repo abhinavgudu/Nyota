@@ -30,9 +30,12 @@ class DashboardScreenState extends State<DashboardScreen> {
     refresh();
   }
 
+  String? _error;
+
   Future<void> refresh() async {
     setState(() {
       _loading = true;
+      _error = null;
     });
     try {
       final event = await NyotaService.latestEvent();
@@ -56,11 +59,13 @@ class DashboardScreenState extends State<DashboardScreen> {
       if (mounted) {
         setState(() {
           _loading = false;
+          _error = e.toString();
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: NyotaColors.danger,
-            content: Text('Could not load dashboard. Pull down to retry.'),
+            content: Text('Could not load: ${e.toString()}'),
+            duration: const Duration(seconds: 6),
           ),
         );
       }
@@ -85,23 +90,24 @@ class DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.celebration_outlined, size: 64, color: NyotaColors.saffron),
+              Icon(_error != null ? Icons.error_outline : Icons.celebration_outlined,
+                  size: 64, color: _error != null ? NyotaColors.danger : NyotaColors.saffron),
               const SizedBox(height: 16),
-              const Text(
-                'Welcome to Nyota',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+              Text(
+                _error != null ? 'Could not load data' : 'Welcome to Nyota',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Create your first event to start recording guests, gifts and collections.',
+              Text(
+                _error ?? 'Create your first event or join one to start recording guests, gifts and collections.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: NyotaColors.muted, height: 1.4),
+                style: TextStyle(color: _error != null ? NyotaColors.danger : NyotaColors.muted, height: 1.4),
               ),
               const SizedBox(height: 24),
               FilledButton.icon(
-                onPressed: _createFirstEvent,
-                icon: const Icon(Icons.add),
-                label: const Text('Create Event'),
+                onPressed: _error != null ? refresh : _createFirstEvent,
+                icon: Icon(_error != null ? Icons.refresh : Icons.add),
+                label: Text(_error != null ? 'Retry' : 'Create / Join Event'),
               ),
             ],
           ),
