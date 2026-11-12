@@ -76,6 +76,24 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-public-key>
 
 Production build: `npm run build && npm start`.
 
+### Deploy on Vercel (GitHub)
+
+1. Push this repo to GitHub (see commands below).
+2. In Vercel, **Import** the repo.
+3. Set **Root Directory** to `web` (important — this is a monorepo).
+4. Add Environment Variables in Vercel project settings:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+5. Deploy. Vercel will run `npm install` and `npm run build` inside `web/`.
+
+Push to GitHub (replace `<your-github-username>` / repo name as you like):
+
+```bash
+git remote add origin https://github.com/<your-github-username>/nyota.git
+git branch -M main
+git push -u origin main
+```
+
 ## 3. Mobile app (Flutter)
 
 ```bash
