@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Shell from '@/components/Shell';
+import { VoiceMic } from '@/components/VoiceMic';
 import {
   GiftPayload,
   NyotaEvent,
@@ -90,27 +91,38 @@ function FoodOnlyForm() {
   return (
     <>
       <div className="card">
+        <div style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 12, padding: '10px 12px', marginBottom: 12, fontSize: 13, fontWeight: 600, display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 18 }}>🎤</span>
+          <span>Voice typing on every field — bolo "paanch sau do" ya "502" aur amount turant bhar jayega.</span>
+        </div>
         <div className="field">
           <label>Guest name (optional)</label>
-          <input
-            ref={nameRef}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Skip if the queue is too fast"
-          />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              ref={nameRef}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Skip if the queue is too fast, or speak name"
+              style={{ flex: 1 }}
+            />
+            <VoiceMic title="Speak guest name" onResult={(t) => setName((prev) => (prev ? prev + ' ' + t : t))} />
+          </div>
         </div>
         <div className="field">
           <label>Amount ₹ *</label>
-          <input
-            ref={amountRef}
-            type="number"
-            inputMode="numeric"
-            autoFocus
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Tap a quick amount or type"
-            style={{ fontSize: 22, fontWeight: 800 }}
-          />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              ref={amountRef}
+              type="number"
+              inputMode="numeric"
+              autoFocus
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Tap a quick amount, type, or speak (e.g. 501)"
+              style={{ fontSize: 22, fontWeight: 800, flex: 1 }}
+            />
+            <VoiceMic numeric title="Speak amount (e.g. five hundred two)" onResult={(t) => setAmount(t.replace(/[^0-9]/g, ''))} />
+          </div>
         </div>
 
         <div className="quick-amounts">
@@ -127,13 +139,18 @@ function FoodOnlyForm() {
 
         <div className="field" style={{ marginTop: 14 }}>
           <label>Additional amount (optional)</label>
-          <input
-            type="number"
-            inputMode="numeric"
-            value={extra}
-            onChange={(e) => setExtra(e.target.value)}
-            placeholder="e.g. ₹500 + ₹2 → ₹502"
-          />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={extra}
+              onChange={(e) => setExtra(e.target.value)}
+              placeholder='e.g. speak "do" to add ₹2'
+              style={{ flex: 1 }}
+            />
+            <VoiceMic numeric title='Speak additional amount (e.g. "two")' onResult={(t) => setExtra(t.replace(/[^0-9]/g, ''))} />
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>e.g. ₹500 + ₹2 → ₹502</div>
         </div>
 
         <div className={`total-row${total > 0 ? ' hot' : ''}`}>
@@ -265,29 +282,45 @@ function NyotaForm() {
   return (
     <>
       <div className="card">
+        <div style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 12, padding: '10px 12px', marginBottom: 12, fontSize: 13, fontWeight: 600, display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 18 }}>🎤</span>
+          <span>Voice typing on every field — naam, pita ka naam, gaon, amount, gift sab bolo aur bhar jayega.</span>
+        </div>
         <div className="field">
           <label>Guest name</label>
-          <input value={guestName} onChange={(e) => setGuestName(e.target.value)} />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input value={guestName} onChange={(e) => setGuestName(e.target.value)} style={{ flex: 1 }} />
+            <VoiceMic onResult={(t) => setGuestName((p) => (p ? p + ' ' + t : t))} />
+          </div>
         </div>
         <div className="field">
           <label>Father&apos;s name</label>
-          <input value={fatherName} onChange={(e) => setFatherName(e.target.value)} />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input value={fatherName} onChange={(e) => setFatherName(e.target.value)} style={{ flex: 1 }} />
+            <VoiceMic onResult={(t) => setFatherName((p) => (p ? p + ' ' + t : t))} />
+          </div>
         </div>
         <div className="field">
           <label>Village / City</label>
-          <input value={village} onChange={(e) => setVillage(e.target.value)} />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input value={village} onChange={(e) => setVillage(e.target.value)} style={{ flex: 1 }} />
+            <VoiceMic onResult={(t) => setVillage((p) => (p ? p + ' ' + t : t))} />
+          </div>
         </div>
         <div className="field">
           <label>Cash / Lifafa amount ₹</label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            inputMode="decimal"
-            value={cash}
-            onChange={(e) => setCash(e.target.value)}
-            style={{ fontSize: 20, fontWeight: 800 }}
-          />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              value={cash}
+              onChange={(e) => setCash(e.target.value)}
+              style={{ fontSize: 20, fontWeight: 800, flex: 1 }}
+            />
+            <VoiceMic numeric onResult={(t) => setCash(t.replace(/[^0-9.]/g, ''))} />
+          </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', margin: '18px 0 8px' }}>
@@ -313,11 +346,17 @@ function NyotaForm() {
             </div>
             <div className="field" style={{ marginTop: 8 }}>
               <label>Gift name *</label>
-              <input value={g.name} onChange={(e) => updateGift(i, { name: e.target.value })} placeholder="e.g. Brass Diya Set" />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input value={g.name} onChange={(e) => updateGift(i, { name: e.target.value })} placeholder="e.g. Brass Diya Set (or speak)" style={{ flex: 1 }} />
+                <VoiceMic onResult={(t) => updateGift(i, { name: g.name ? g.name + ' ' + t : t })} />
+              </div>
             </div>
             <div className="field">
               <label>Description (optional)</label>
-              <input value={g.description} onChange={(e) => updateGift(i, { description: e.target.value })} placeholder='e.g. Pair of 6" brass diyas' />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input value={g.description} onChange={(e) => updateGift(i, { description: e.target.value })} placeholder='e.g. Pair of 6" brass diyas' style={{ flex: 1 }} />
+                <VoiceMic onResult={(t) => updateGift(i, { description: g.description ? g.description + ' ' + t : t })} />
+              </div>
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
               {g.file ? (

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Shell from '@/components/Shell';
+import { VoiceMic } from '@/components/VoiceMic';
 import { exportRegisterPdf } from '@/lib/pdf';
 import {
   Category,
@@ -108,13 +109,16 @@ export default function RegisterPage() {
     <Shell>
       <div className="container">
         <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            className="search-bar"
-            style={{ flex: 1, minWidth: 220, marginBottom: 0 }}
-            placeholder="Search name, father or village…"
-            value={search}
-            onChange={(e) => onSearch(e.target.value)}
-          />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1, minWidth: 220 }}>
+            <input
+              className="search-bar"
+              style={{ flex: 1, marginBottom: 0 }}
+              placeholder="Search name, father or village… (or speak)"
+              value={search}
+              onChange={(e) => onSearch(e.target.value)}
+            />
+            <VoiceMic onResult={(t) => onSearch(t)} />
+          </div>
           <button className="btn danger" onClick={exportPdf} disabled={!event}>
             Export PDF
           </button>
@@ -356,30 +360,48 @@ function EntryModal({
             <h2>Edit Entry</h2>
             <div className="field">
               <label>Guest name</label>
-              <input value={guestName} onChange={(e) => setGuestName(e.target.value)} />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input value={guestName} onChange={(e) => setGuestName(e.target.value)} style={{ flex: 1 }} />
+                <VoiceMic onResult={(t) => setGuestName((p) => (p ? p + ' ' + t : t))} />
+              </div>
             </div>
             <div className="field">
               <label>Father&apos;s name</label>
-              <input value={fatherName} onChange={(e) => setFatherName(e.target.value)} />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input value={fatherName} onChange={(e) => setFatherName(e.target.value)} style={{ flex: 1 }} />
+                <VoiceMic onResult={(t) => setFatherName((p) => (p ? p + ' ' + t : t))} />
+              </div>
             </div>
             <div className="field">
               <label>Village / City</label>
-              <input value={village} onChange={(e) => setVillage(e.target.value)} />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input value={village} onChange={(e) => setVillage(e.target.value)} style={{ flex: 1 }} />
+                <VoiceMic onResult={(t) => setVillage((p) => (p ? p + ' ' + t : t))} />
+              </div>
             </div>
             <div className="field">
               <label>Cash / Lifafa amount ₹</label>
-              <input type="number" min="0" step="0.01" value={cash} onChange={(e) => setCash(e.target.value)} />
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="number" min="0" step="0.01" value={cash} onChange={(e) => setCash(e.target.value)} style={{ flex: 1 }} />
+                <VoiceMic numeric onResult={(t) => setCash(t.replace(/[^0-9.]/g, ''))} />
+              </div>
             </div>
             <h3 style={{ fontSize: 15, margin: '12px 0 8px' }}>Gifts</h3>
             {gifts.map((g, i) => (
               <div key={i} className="card" style={{ boxShadow: 'none', border: '1px solid var(--border)', marginBottom: 8 }}>
                 <div className="field" style={{ marginBottom: 8 }}>
                   <label>Gift name *</label>
-                  <input value={g.name} onChange={(e) => setGifts(gifts.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <input value={g.name} onChange={(e) => setGifts(gifts.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} style={{ flex: 1 }} />
+                    <VoiceMic onResult={(t) => setGifts(gifts.map((x, j) => (j === i ? { ...x, name: x.name ? x.name + ' ' + t : t } : x)))} />
+                  </div>
                 </div>
                 <div className="field" style={{ marginBottom: 8 }}>
                   <label>Description (optional)</label>
-                  <input value={g.description} onChange={(e) => setGifts(gifts.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)))} />
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <input value={g.description} onChange={(e) => setGifts(gifts.map((x, j) => (j === i ? { ...x, description: e.target.value } : x)))} style={{ flex: 1 }} />
+                    <VoiceMic onResult={(t) => setGifts(gifts.map((x, j) => (j === i ? { ...x, description: x.description ? x.description + ' ' + t : t } : x)))} />
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   {g.file ? (

@@ -5,6 +5,7 @@ import '../models.dart';
 import '../services/nyota_service.dart';
 import '../theme.dart';
 import '../widgets/gift_thumb.dart';
+import '../widgets/voice_text_field.dart';
 import 'entry_detail_screen.dart';
 
 /// Unified guest register: all entries with search + infinite pagination.
@@ -138,17 +139,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onChanged: _onSearchChanged,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
-                  hintText: 'Search name, father or village…',
+                  hintText: 'Search name, father or village… (or tap mic)',
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _search.isEmpty
-                      ? null
-                      : IconButton(
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      VoiceMicButton(
+                        compact: true,
+                        size: 36,
+                        onResult: (text) {
+                          _searchCtrl.text = text;
+                          _onSearchChanged(text);
+                        },
+                      ),
+                      if (_search.isNotEmpty)
+                        IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () {
                             _searchCtrl.clear();
                             _onSearchChanged('');
                           },
                         ),
+                    ],
+                  ),
+                  suffixIconConstraints: const BoxConstraints(minWidth: 80, minHeight: 48),
                 ),
               ),
             ),

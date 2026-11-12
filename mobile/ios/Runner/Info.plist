@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Nyota uses the microphone for fast voice entry of guest names, amounts, and gift details.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Nyota uses speech recognition to let you enter guests and gifts quickly by voice.</string>
 </dict>
 </plist>

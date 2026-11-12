@@ -26,6 +26,10 @@ web/npm-debug.log*
 web/yarn-debug.log*
 web/yarn-error.log*
 
+# Mobile env (secrets)
+mobile/.env*
+!mobile/.env.example
+
 # Supabase local
 supabase/.temp/
 supabase/.branches/

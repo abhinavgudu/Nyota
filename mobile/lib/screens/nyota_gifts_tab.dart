@@ -6,6 +6,7 @@ import '../models.dart' show GiftPayload;
 import '../services/nyota_service.dart';
 import '../theme.dart';
 import '../utils/image_compressor.dart';
+import '../widgets/voice_text_field.dart';
 
 /// Nyota with Gifts: guest details + cash + any number of gifts,
 /// each with its own optional image (compressed, uploaded with progress).
@@ -204,48 +205,62 @@ class _NyotaGiftsTabState extends State<NyotaGiftsTab>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: NyotaColors.saffron.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: NyotaColors.saffron.withValues(alpha: 0.35)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.mic, color: NyotaColors.saffron, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Voice typing on every field — tap mic to speak names, village, amount, or gift details.',
+                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: NyotaColors.ink),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            VoiceTextField(
               controller: _nameCtrl,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Guest name',
-                prefixIcon: Icon(Icons.person_outline),
-              ),
+              label: 'Guest name',
+              prefixIcon: Icons.person_outline,
             ),
             const SizedBox(height: 12),
-            TextField(
+            VoiceTextField(
               controller: _fatherCtrl,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: "Father's name",
-                prefixIcon: Icon(Icons.family_restroom_outlined),
-              ),
+              label: "Father's name",
+              prefixIcon: Icons.family_restroom_outlined,
             ),
             const SizedBox(height: 12),
-            TextField(
+            VoiceTextField(
               controller: _villageCtrl,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Village / City',
-                prefixIcon: Icon(Icons.location_city_outlined),
-              ),
+              label: 'Village / City',
+              prefixIcon: Icons.location_city_outlined,
             ),
             const SizedBox(height: 12),
-            TextField(
+            VoiceTextField(
               controller: _cashCtrl,
+              numeric: true,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
               textInputAction: TextInputAction.done,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-              decoration: const InputDecoration(
-                labelText: 'Cash / Lifafa amount ₹',
-                prefixIcon: Icon(Icons.currency_rupee),
-              ),
+              label: 'Cash / Lifafa amount ₹',
+              prefixIcon: Icons.currency_rupee,
             ),
             const SizedBox(height: 20),
 
@@ -360,23 +375,20 @@ class _GiftDraftCard extends StatelessWidget {
                 ),
               ],
             ),
-            TextField(
+            VoiceTextField(
               controller: draft.nameCtrl,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Gift name *',
-                hintText: 'e.g. Brass Diya Set',
-              ),
+              label: 'Gift name *',
+              hint: 'e.g. Brass Diya Set (or speak)',
             ),
             const SizedBox(height: 10),
-            TextField(
+            VoiceTextField(
               controller: draft.descCtrl,
               textInputAction: TextInputAction.done,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
-                hintText: 'e.g. Pair of 6" brass diyas',
-              ),
+              textCapitalization: TextCapitalization.sentences,
+              label: 'Description (optional)',
+              hint: 'e.g. Pair of 6" brass diyas',
             ),
             const SizedBox(height: 12),
             Row(

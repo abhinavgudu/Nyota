@@ -10,6 +10,7 @@ import '../theme.dart';
 import '../utils/image_compressor.dart';
 import '../widgets/gift_thumb.dart';
 import 'image_viewer_screen.dart';
+import '../widgets/voice_text_field.dart';
 
 /// View, edit and delete a single guest entry.
 class EntryDetailScreen extends StatefulWidget {
@@ -431,30 +432,31 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        TextField(
+        VoiceTextField(
           controller: _nameCtrl,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(labelText: 'Guest name'),
+          label: 'Guest name',
         ),
         const SizedBox(height: 12),
-        TextField(
+        VoiceTextField(
           controller: _fatherCtrl,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(labelText: "Father's name"),
+          label: "Father's name",
         ),
         const SizedBox(height: 12),
-        TextField(
+        VoiceTextField(
           controller: _villageCtrl,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(labelText: 'Village / City'),
+          label: 'Village / City',
         ),
         const SizedBox(height: 12),
-        TextField(
+        VoiceTextField(
           controller: _cashCtrl,
+          numeric: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
-          decoration: const InputDecoration(labelText: 'Cash / Lifafa amount ₹'),
+          label: 'Cash / Lifafa amount ₹',
         ),
         const SizedBox(height: 18),
         Row(
@@ -484,10 +486,10 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: VoiceTextField(
                     controller: d.nameCtrl,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(labelText: 'Gift name *'),
+                    label: 'Gift name *',
                   ),
                 ),
                 IconButton(
@@ -502,9 +504,9 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
               ],
             ),
             const SizedBox(height: 8),
-            TextField(
+            VoiceTextField(
               controller: d.descCtrl,
-              decoration: const InputDecoration(labelText: 'Description (optional)'),
+              label: 'Description (optional)',
             ),
             const SizedBox(height: 10),
             Row(

@@ -43,10 +43,13 @@ Nyota/
    `0001_schema.sql` → `0002_rls.sql` → `0003_storage.sql`.
    (Or use the Supabase CLI: `supabase db push` with these files in `supabase/migrations/`.)
 3. From **Project Settings → API** copy:
-   - `Project URL`  → this is `SUPABASE_URL`
-   - `anon / public` key → this is the anon key. **Never use the service-role key in the app or website.**
+   - `Project URL`  → `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon / public` key → `SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `publishable` key (optional) → `SUPABASE_PUBLISHABLE_KEY`
 
-Note: users sign up through the app; email confirmation can be enabled/disabled under **Authentication → Providers**.
+**Never put secrets in source code.** All keys live in env files (`.env` / `.env.local`) which are gitignored.
+
+Note: users sign up through the app; for fast event use you can disable email confirmation under **Authentication → Providers → Email**.
 
 ### Database model
 
@@ -62,16 +65,17 @@ Note: users sign up through the app; email confirmation can be enabled/disabled 
 
 ```bash
 cd web
-cp .env.example .env.local      # then fill in the two values
+cp .env.example .env.local      # then fill in the values
 npm install
 npm run dev                     # http://localhost:3000
 ```
 
-Environment variables (`web/.env.local`):
+Environment variables (`web/.env.local`, gitignored — never commit):
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-public-key>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable-key-optional>
 ```
 
 Production build: `npm run build && npm start`.
@@ -98,21 +102,25 @@ git push -u origin main
 
 ```bash
 cd mobile
+cp .env.example .env            # then fill in the values (gitignored)
 flutter pub get
-flutter run \
-  --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=<anon-public-key>
+
+# Run on device/emulator
+flutter run --dart-define-from-file=.env
+
+# Build release APK for phone testing
+flutter build apk --release --dart-define-from-file=.env
 ```
 
-Release build:
+`mobile/.env` (gitignored — never commit, no secrets in source):
 
-```bash
-flutter build apk \
-  --dart-define=SUPABASE_URL=... \
-  --dart-define=SUPABASE_ANON_KEY=...
+```
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_ANON_KEY=<anon-public-key>
+SUPABASE_PUBLISHABLE_KEY=<publishable-key-optional>
 ```
 
-The `--dart-define` values are compiled into the app; use the **anon key only** — RLS on every table + storage bucket policies is what protects the data.
+The values are injected at build/run time via `--dart-define-from-file`; **do not hardcode keys in code**. Use the **anon key only** — RLS on every table + storage bucket policies protects the data.
 
 ## Design system
 

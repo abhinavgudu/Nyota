@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../services/nyota_service.dart';
 import '../theme.dart';
+import '../widgets/voice_text_field.dart';
 
 /// Food Only quick entry — built for ~1,000 guests arriving together.
 /// Amount is compulsory; guest name is optional; one tap save & next.
@@ -143,34 +144,52 @@ class _FoodOnlyTabState extends State<FoodOnlyTab>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Voice typing hint - fast entry
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: NyotaColors.saffron.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: NyotaColors.saffron.withValues(alpha: 0.35)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.mic, color: NyotaColors.saffron, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Tap the mic on any field to speak — say "paanch sau do" or "502" for instant amount entry.',
+                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: NyotaColors.ink),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             // Guest name (optional)
-            TextField(
+            VoiceTextField(
               controller: _nameCtrl,
               focusNode: _nameFocus,
               textInputAction: TextInputAction.next,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Guest name (optional)',
-                hintText: 'Skip if the queue is too fast',
-                prefixIcon: Icon(Icons.person_outline),
-              ),
+              label: 'Guest name (optional)',
+              hint: 'Speak name or skip',
+              prefixIcon: Icons.person_outline,
             ),
             const SizedBox(height: 14),
 
-            // Amount (compulsory) with numeric keypad
-            TextField(
+            // Amount (compulsory) with numeric keypad + voice
+            VoiceTextField(
               controller: _amountCtrl,
               focusNode: _amountFocus,
-              autofocus: false,
+              numeric: true,
               keyboardType: const TextInputType.numberWithOptions(),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               textInputAction: TextInputAction.next,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-              decoration: const InputDecoration(
-                labelText: 'Amount ₹ *',
-                hintText: 'Tap a quick amount or type',
-                prefixIcon: Icon(Icons.currency_rupee, size: 26),
-              ),
+              label: 'Amount ₹ *',
+              hint: 'Tap quick amount, type, or speak (e.g. "501")',
+              prefixIcon: Icons.currency_rupee,
             ),
             const SizedBox(height: 12),
 
@@ -193,20 +212,23 @@ class _FoodOnlyTabState extends State<FoodOnlyTab>
             const SizedBox(height: 14),
 
             // Additional amount (e.g. ₹500 + ₹2 = ₹502)
-            TextField(
+            VoiceTextField(
               controller: _extraCtrl,
+              numeric: true,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _saveAndNext(),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-              decoration: const InputDecoration(
-                labelText: 'Additional amount (optional)',
-                prefixIcon: Icon(Icons.add),
-                helperText: 'e.g. ₹500 + ₹2 → ₹502',
-              ),
+              label: 'Additional amount (optional)',
+              hint: 'e.g. speak "do" to add ₹2',
+              prefixIcon: Icons.add,
             ),
-            const SizedBox(height: 18),
+            const Padding(
+              padding: EdgeInsets.only(top: 4, left: 4),
+              child: Text('e.g. ₹500 + ₹2 → ₹502', style: TextStyle(fontSize: 12, color: NyotaColors.muted)),
+            ),
+            const SizedBox(height: 14),
 
             // Running total card
             Container(
