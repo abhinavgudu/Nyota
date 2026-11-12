@@ -1,0 +1,289 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../models.dart';
+import '../services/nyota_service.dart';
+import '../theme.dart';
+import 'event_dialog.dart';
+import 'pdf_export_screen.dart';
+
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => DashboardScreenState();
+}
+
+class DashboardScreenState extends State<DashboardScreen> {
+  static final _money = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
+
+  NyotaEvent? _event;
+  DashboardTotals? _totals;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    refresh();
+  }
+
+  Future<void> refresh() async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      final event = await NyotaService.latestEvent();
+      if (event == null) {
+        setState(() {
+          _event = null;
+          _totals = null;
+          _loading = false;
+        });
+        return;
+      }
+      final totals = await NyotaService.dashboardTotals(event.id);
+      if (mounted) {
+        setState(() {
+          _event = event;
+          _totals = totals;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: NyotaColors.danger,
+            content: Text('Could not load dashboard. Pull down to retry.'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _createFirstEvent() async {
+    final event = await showEventDialog(context);
+    if (event != null) refresh();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_event == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.celebration_outlined, size: 64, color: NyotaColors.saffron),
+              const SizedBox(height: 16),
+              const Text(
+                'Welcome to Nyota',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Create your first event to start recording guests, gifts and collections.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: NyotaColors.muted, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _createFirstEvent,
+                icon: const Icon(Icons.add),
+                label: const Text('Create Event'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final t = _totals;
+    return RefreshIndicator(
+      onRefresh: refresh,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Event card
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: NyotaColors.royalPurple.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.event, color: NyotaColors.royalPurple),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_event!.name,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w800, color: NyotaColors.ink)),
+                        if (_event!.eventDate != null && _event!.eventDate!.isNotEmpty)
+                          Text(
+                            DateFormat('d MMMM yyyy').format(DateTime.parse(_event!.eventDate!)),
+                            style: const TextStyle(color: NyotaColors.muted),
+                          ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Switch / add event',
+                    icon: const Icon(Icons.swap_horiz, color: NyotaColors.royalPurple),
+                    onPressed: _createFirstEvent,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (t == null)
+            const Center(child: CircularProgressIndicator())
+          else ...[
+            _StatGrid(t: t, money: _money),
+            const SizedBox(height: 16),
+            Card(
+              margin: EdgeInsets.zero,
+              child: ListTile(
+                leading: const Icon(Icons.picture_as_pdf, color: NyotaColors.danger),
+                title: const Text('Export Guest Register PDF',
+                    style: TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: const Text('Share or print the full register'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => PdfExportScreen(event: _event!),
+                  ));
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StatGrid extends StatelessWidget {
+  const _StatGrid({required this.t, required this.money});
+
+  final DashboardTotals t;
+  final NumberFormat money;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 1.35,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      children: [
+        _StatCard(
+          icon: Icons.people_alt_outlined,
+          color: NyotaColors.royalPurple,
+          label: 'Total Guests',
+          value: '${t.totalGuests}',
+        ),
+        _StatCard(
+          icon: Icons.card_giftcard,
+          color: NyotaColors.saffron,
+          label: 'Nyota Cash',
+          value: money.format(t.totalNyotaCash),
+        ),
+        _StatCard(
+          icon: Icons.restaurant,
+          color: NyotaColors.deepIndigo,
+          label: 'Food Only',
+          value: money.format(t.totalFoodOnly),
+        ),
+        _StatCard(
+          icon: Icons.currency_rupee,
+          color: NyotaColors.success,
+          label: 'Total Cash',
+          value: money.format(t.totalCash),
+          emphasized: true,
+        ),
+        _StatCard(
+          icon: Icons.redeem,
+          color: NyotaColors.royalPurple,
+          label: 'Physical Gifts',
+          value: '${t.totalGifts}',
+        ),
+      ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+    this.emphasized = false,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String value;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const Spacer(),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: emphasized ? 26 : 22,
+                  fontWeight: FontWeight.w800,
+                  color: emphasized ? color : NyotaColors.ink,
+                ),
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12.5, color: NyotaColors.muted, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
