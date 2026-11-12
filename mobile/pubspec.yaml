@@ -45,6 +45,7 @@ dependencies:
   speech_to_text: ^7.4.0
   qr_flutter: ^4.1.0
   share_plus: ^13.3.1
+  audioplayers: ^6.7.1
 
 dependency_overrides:
   archive: 3.6.1
@@ -82,6 +83,7 @@ flutter:
   assets:
     - assets/logo.png
     - assets/logo_mark.png
+    - assets/sounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Shell from '@/components/Shell';
 import { VoiceMic } from '@/components/VoiceMic';
+import { confirmSave } from '@/lib/sound';
 import { exportRegisterPdf } from '@/lib/pdf';
 import {
   Category,
@@ -268,6 +269,7 @@ function EntryModal({
         village,
         gifts: payloads,
       });
+      confirmSave();
       showToast('Entry updated.');
       onChanged();
     } catch {
@@ -281,6 +283,7 @@ function EntryModal({
     setBusy(true);
     try {
       await deleteEntry(entry.id);
+      confirmSave();
       showToast('Entry deleted.');
       onChanged();
     } catch {

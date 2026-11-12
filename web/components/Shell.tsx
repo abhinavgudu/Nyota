@@ -3,12 +3,19 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { initSound, isSoundEnabled, playSuccess, setSoundEnabled } from '@/lib/sound';
 import { signOut, supabase, supabaseConfigured } from '@/lib/supabase';
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [checked, setChecked] = useState(false);
+  const [sound, setSound] = useState(true);
+
+  useEffect(() => {
+    initSound();
+    setSound(isSoundEnabled());
+  }, []);
 
   useEffect(() => {
     if (!supabaseConfigured) return;
@@ -78,6 +85,19 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
         </nav>
+        <button
+          onClick={() => {
+            const next = !sound;
+            setSound(next);
+            setSoundEnabled(next);
+            if (next) playSuccess();
+          }}
+          title={sound ? 'Turn entry sound off' : 'Turn entry sound on'}
+          aria-label={sound ? 'Turn entry sound off' : 'Turn entry sound on'}
+          style={{ padding: '8px 12px' }}
+        >
+          {sound ? '🔊 Sound on' : '🔇 Sound off'}
+        </button>
         <button
           onClick={async () => {
             await signOut();

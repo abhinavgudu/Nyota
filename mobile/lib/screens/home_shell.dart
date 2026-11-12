@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/nyota_service.dart';
+import '../utils/sound_util.dart';
 import 'dashboard_screen.dart';
 import 'entry_form_screen.dart';
 import 'register_screen.dart';
@@ -38,6 +39,19 @@ class _HomeShellState extends State<HomeShell> {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: SoundUtil.enabled ? 'Sound off' : 'Sound on',
+            icon: Icon(
+              SoundUtil.enabled ? Icons.volume_up : Icons.volume_off,
+              color: Colors.white,
+            ),
+            onPressed: () async {
+              await SoundUtil.setEnabled(!SoundUtil.enabled);
+              if (!mounted) return;
+              setState(() {});
+              if (SoundUtil.enabled) await SoundUtil.confirmSave();
+            },
+          ),
           IconButton(
             tooltip: 'Sign out',
             icon: const Icon(Icons.logout),

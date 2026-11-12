@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'screens/auth_screen.dart';
 import 'theme.dart';
+import 'utils/sound_util.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,8 @@ void main() async {
     url: supabaseUrl,
     publishableKey: supabaseAnonKey,
   );
+  // Remember whether the confirmation sound is on/off.
+  await SoundUtil.init();
   runApp(const NyotaApp());
 }
 

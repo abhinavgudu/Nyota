@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../services/nyota_service.dart';
 import '../theme.dart';
+import '../utils/sound_util.dart';
 import '../widgets/voice_text_field.dart';
 
 /// Food Only quick entry — built for ~1,000 guests arriving together.
@@ -93,6 +94,9 @@ class _FoodOnlyTabState extends State<FoodOnlyTab>
         _savedCount++;
         _saving = false;
       });
+      // Confirmation sound + haptic so the counter knows the entry went in.
+      await SoundUtil.confirmSave();
+      if (!mounted) return;
       // Clear the form and prepare for the next guest instantly.
       _amountCtrl.clear();
       _extraCtrl.clear();

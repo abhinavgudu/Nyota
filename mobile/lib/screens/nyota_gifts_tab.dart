@@ -6,6 +6,7 @@ import '../models.dart' show GiftPayload;
 import '../services/nyota_service.dart';
 import '../theme.dart';
 import '../utils/image_compressor.dart';
+import '../utils/sound_util.dart';
 import '../widgets/voice_text_field.dart';
 
 /// Nyota with Gifts: guest details + cash + any number of gifts,
@@ -148,6 +149,9 @@ class _NyotaGiftsTabState extends State<NyotaGiftsTab>
       if (!mounted) return;
       setState(() => _saving = false);
       _resetForm();
+      // Confirmation sound + haptic so the counter knows the entry went in.
+      await SoundUtil.confirmSave();
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(

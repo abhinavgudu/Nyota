@@ -8,6 +8,7 @@ import '../models.dart';
 import '../services/nyota_service.dart';
 import '../theme.dart';
 import '../utils/image_compressor.dart';
+import '../utils/sound_util.dart';
 import '../widgets/gift_thumb.dart';
 import 'image_viewer_screen.dart';
 import '../widgets/voice_text_field.dart';
@@ -146,6 +147,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
       if (!mounted) return;
       setState(() => _editing = false);
       await _load();
+      await SoundUtil.confirmSave();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           backgroundColor: NyotaColors.success,
@@ -185,6 +187,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     setState(() => _deleting = true);
     try {
       await NyotaService.deleteEntry(widget.entryId);
+      await SoundUtil.confirmSave();
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {

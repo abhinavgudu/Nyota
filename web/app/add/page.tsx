@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import Shell from '@/components/Shell';
 import { VoiceMic } from '@/components/VoiceMic';
+import { confirmSave } from '@/lib/sound';
 import {
   GiftPayload,
   NyotaEvent,
@@ -78,6 +79,8 @@ function FoodOnlyForm() {
       setName('');
       setAmount('');
       setExtra('');
+      // Confirmation sound + vibration so the counter knows it went in.
+      confirmSave();
       // Prepare instantly for the next guest.
       nameRef.current?.focus();
       showToast(`Saved ₹${total} — entry #${savedCount + 1}. Ready for next guest!`);
@@ -271,6 +274,8 @@ function NyotaForm() {
       setVillage('');
       setCash('');
       setGifts([]);
+      // Confirmation sound + vibration so the counter knows it went in.
+      confirmSave();
       showToast(uploadFailed ? 'Entry saved, but one gift image failed to upload.' : 'Entry saved!');
     } catch {
       showToast('Could not save entry. Please try again.', true);
