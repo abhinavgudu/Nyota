@@ -43,6 +43,9 @@ dependencies:
   shared_preferences: ^2.5.3
   http: ^1.2.2
 
+dependency_overrides:
+  archive: 3.6.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
