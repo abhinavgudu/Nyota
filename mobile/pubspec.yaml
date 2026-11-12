@@ -45,6 +45,7 @@ dependencies:
 
 dependency_overrides:
   archive: 3.6.1
+  image: 4.3.0
 
 dev_dependencies:
   flutter_test:
