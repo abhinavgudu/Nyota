@@ -40,9 +40,10 @@ Nyota/
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. Open **SQL Editor** and run the migration files in order:
-   `0001_schema.sql` → `0002_rls.sql` → `0003_storage.sql` → `0004_event_sharing.sql`.
+   `0001_schema.sql` → `0002_rls.sql` → `0003_storage.sql` → `0004_event_sharing.sql` → `0005_fix_policy_recursion.sql`.
    (Or use the Supabase CLI: `supabase db push` with these files in `supabase/migrations/`.)
    - `0004_event_sharing.sql` adds event join code, members, collaborative access, and `join_event_by_code` RPC (required for QR/code/share-link join).
+   - `0005_fix_policy_recursion.sql` fixes `42P17 infinite recursion detected in policy for relation "events"` (the `events` ↔ `event_members` policy cycle) by moving both checks into `SECURITY DEFINER` helper functions. Safe to re-run.
 3. From **Project Settings → API** copy:
    - `Project URL`  → `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`
    - `anon / public` key → `SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
