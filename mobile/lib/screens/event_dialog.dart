@@ -74,7 +74,7 @@ class _EventSheetState extends State<_EventSheet> {
     } catch (e) {
       setState(() {
         _busy = false;
-        _error = 'Could not create event. Please try again.';
+        _error = 'Could not create event: $e';
       });
     }
   }

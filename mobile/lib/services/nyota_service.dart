@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -41,12 +42,38 @@ class NyotaService {
 
   static Future<NyotaEvent> createEvent(String name, String? eventDate) async {
     final uid = _client.auth.currentUser!.id;
-    final row = await _client
-        .from('events')
-        .insert({'owner_id': uid, 'name': name, 'event_date': eventDate})
-        .select()
-        .single();
-    return NyotaEvent.fromMap(row);
+    // Send our own join_code so the insert works even if the DB trigger that
+    // fills join_code is missing. If the column does not exist on this
+    // database, fall back to a plain insert.
+    try {
+      final row = await _client
+          .from('events')
+          .insert({
+            'owner_id': uid,
+            'name': name,
+            'event_date': eventDate,
+            'join_code': _randomJoinCode(),
+          })
+          .select()
+          .single();
+      return NyotaEvent.fromMap(row);
+    } catch (e) {
+      if (e.toString().contains('join_code')) {
+        final row = await _client
+            .from('events')
+            .insert({'owner_id': uid, 'name': name, 'event_date': eventDate})
+            .select()
+            .single();
+        return NyotaEvent.fromMap(row);
+      }
+      rethrow;
+    }
+  }
+
+  static String _randomJoinCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final rnd = Random();
+    return List.generate(8, (_) => chars[rnd.nextInt(chars.length)]).join();
   }
 
   static Future<List<NyotaEvent>> listEvents() async {

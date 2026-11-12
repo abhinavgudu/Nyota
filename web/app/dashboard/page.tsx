@@ -271,9 +271,11 @@ function EventModal({
     try {
       const ev = await createEvent(name.trim(), date || null);
       onDone(ev);
-    } catch {
+    } catch (e: unknown) {
       setBusy(false);
-      setError('Could not create event. Please try again.');
+      const msg = e instanceof Error ? e.message : 'Unknown error';
+      // Show the real reason (RLS, duplicate, missing column, network…).
+      setError(`Could not create event: ${msg}`);
     }
   }
 

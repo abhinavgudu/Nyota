@@ -125,18 +125,40 @@ export async function listEvents(): Promise<NyotaEvent[]> {
   return (data ?? []) as NyotaEvent[];
 }
 
+/** Random 8-char share code (client-side fallback if the DB trigger is missing). */
+export function randomJoinCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < 8; i++) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
+}
+
 export async function createEvent(name: string, eventDate: string | null): Promise<NyotaEvent> {
   const { data: userData } = await supabase.auth.getUser();
   const uid = userData.user?.id;
   if (!uid) throw new Error('Not signed in');
 
-  const { data, error } = await supabase
+  // Send our own join_code so the insert works even if the DB trigger that
+  // fills join_code is missing. If the column does not exist on this database,
+  // fall back to a plain insert.
+  let res = await supabase
     .from('events')
-    .insert({ owner_id: uid, name, event_date: eventDate })
+    .insert({ owner_id: uid, name, event_date: eventDate, join_code: randomJoinCode() })
     .select('*')
     .single();
-  if (error) throw error;
-  return data as NyotaEvent;
+
+  if (res.error && /join_code/i.test(res.error.message)) {
+    res = await supabase
+      .from('events')
+      .insert({ owner_id: uid, name, event_date: eventDate })
+      .select('*')
+      .single();
+  }
+
+  if (res.error) throw res.error;
+  return res.data as NyotaEvent;
 }
 
 export async function joinEventByCode(code: string): Promise<NyotaEvent> {
