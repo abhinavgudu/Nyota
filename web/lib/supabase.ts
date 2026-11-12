@@ -29,6 +29,8 @@ export interface NyotaEvent {
   id: string;
   name: string;
   event_date: string | null;
+  join_code?: string | null;
+  owner_id?: string;
 }
 
 export interface Gift {
@@ -135,6 +137,17 @@ export async function createEvent(name: string, eventDate: string | null): Promi
     .single();
   if (error) throw error;
   return data as NyotaEvent;
+}
+
+export async function joinEventByCode(code: string): Promise<NyotaEvent> {
+  const { data, error } = await supabase.rpc('join_event_by_code', { p_code: code.trim().toUpperCase() });
+  if (error) throw error;
+  return data as NyotaEvent;
+}
+
+export function eventShareUrl(joinCode: string): string {
+  const base = (typeof window !== 'undefined' ? window.location.origin : 'https://nyotapay.vercel.app').replace(/\/$/, '');
+  return `${base}/join/${joinCode}`;
 }
 
 // ---------- Dashboard ----------

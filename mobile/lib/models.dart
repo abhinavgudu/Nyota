@@ -5,13 +5,15 @@ class NyotaEvent {
   final String id;
   final String name;
   final String? eventDate;
+  final String? joinCode;
 
-  NyotaEvent({required this.id, required this.name, this.eventDate});
+  NyotaEvent({required this.id, required this.name, this.eventDate, this.joinCode});
 
   factory NyotaEvent.fromMap(Map<String, dynamic> map) => NyotaEvent(
         id: map['id'] as String,
         name: (map['name'] ?? '') as String,
         eventDate: map['event_date'] as String?,
+        joinCode: map['join_code'] as String?,
       );
 }
 

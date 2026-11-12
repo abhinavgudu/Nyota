@@ -1,11 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 import { signIn, signUp, supabase, supabaseConfigured } from '@/lib/supabase';
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') || '/dashboard';
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -17,9 +19,9 @@ export default function LoginPage() {
   useEffect(() => {
     if (!supabaseConfigured) return;
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) router.replace('/dashboard');
+      if (data.session) router.replace(next);
     });
-  }, [router]);
+  }, [router, next]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,12 +34,13 @@ export default function LoginPage() {
         setIsSignUp(false);
       } else {
         await signIn(email, password);
-        router.replace('/dashboard');
+        router.replace(next);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Something went wrong.';
       if (msg.includes('Invalid login')) setError('Wrong email or password.');
       else if (msg.includes('already registered')) setError('This email is already registered. Please sign in.');
+      else if (msg.includes('Email not confirmed')) setError('Email not confirmed. Supabase me "Confirm email" OFF karo ya email verify karo.');
       else setError(msg);
     } finally {
       setBusy(false);
@@ -105,3 +108,12 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="auth-wrap"><div className="auth-card">Loading…</div></div>}>
+      <LoginInner />
+    </Suspense>
+  );
+}
+

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../models.dart';
 import '../services/nyota_service.dart';
@@ -158,6 +161,9 @@ class DashboardScreenState extends State<DashboardScreen> {
           else ...[
             _StatGrid(t: t, money: _money),
             const SizedBox(height: 16),
+            if (_event!.joinCode != null && _event!.joinCode!.isNotEmpty)
+              _ShareJoinCard(event: _event!),
+            const SizedBox(height: 16),
             Card(
               margin: EdgeInsets.zero,
               child: ListTile(
@@ -175,6 +181,109 @@ class DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _ShareJoinCard extends StatelessWidget {
+  const _ShareJoinCard({required this.event});
+  final NyotaEvent event;
+
+  @override
+  Widget build(BuildContext context) {
+    final code = event.joinCode ?? '';
+    final url = NyotaService.eventShareUrl(code);
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Share / Join Event', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            const Text(
+              'Share link, QR code ya event code se koi bhi join kar sakta hai.',
+              style: TextStyle(color: NyotaColors.muted),
+            ),
+            const SizedBox(height: 14),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE5E1F0)),
+                ),
+                child: QrImageView(
+                  data: url,
+                  size: 170,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Center(child: Text('Scan to join', style: TextStyle(color: NyotaColors.muted, fontSize: 12))),
+            const SizedBox(height: 14),
+            const Text('EVENT CODE', style: TextStyle(fontSize: 12, color: NyotaColors.muted, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: NyotaColors.royalPurple.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    code,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: 3, color: NyotaColors.royalPurple),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: code));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event code copied')));
+                    }
+                  },
+                  icon: const Icon(Icons.copy, size: 18),
+                  label: const Text('Copy'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text('SHARE LINK', style: TextStyle(fontSize: 12, color: NyotaColors.muted, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            SelectableText(url, style: const TextStyle(fontSize: 13)),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: url));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Share link copied')));
+                    }
+                  },
+                  icon: const Icon(Icons.link),
+                  label: const Text('Copy Link'),
+                ),
+                FilledButton.icon(
+                  onPressed: () => SharePlus.instance.share(
+                    ShareParams(text: 'Join "${event.name}" on Nyota: $url', subject: 'Join ${event.name} on Nyota'),
+                  ),
+                  icon: const Icon(Icons.share),
+                  label: const Text('Share'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

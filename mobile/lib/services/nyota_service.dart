@@ -28,13 +28,11 @@ class NyotaService {
 
   // ---------------- Events ----------------
 
-  /// Returns the newest event, or null when the user has none yet.
+  /// Returns the newest accessible event (owned or joined), or null.
   static Future<NyotaEvent?> latestEvent() async {
-    final uid = _client.auth.currentUser!.id;
     final rows = await _client
         .from('events')
         .select()
-        .eq('owner_id', uid)
         .order('created_at', ascending: false)
         .limit(1);
     if (rows.isEmpty) return null;
@@ -52,14 +50,22 @@ class NyotaService {
   }
 
   static Future<List<NyotaEvent>> listEvents() async {
-    final uid = _client.auth.currentUser!.id;
     final rows = await _client
         .from('events')
         .select()
-        .eq('owner_id', uid)
         .order('created_at', ascending: false);
     return rows.map(NyotaEvent.fromMap).toList();
   }
+
+  static Future<NyotaEvent> joinEventByCode(String code) async {
+    final data = await _client.rpc('join_event_by_code', params: {
+      'p_code': code.trim().toUpperCase(),
+    });
+    return NyotaEvent.fromMap(Map<String, dynamic>.from(data as Map));
+  }
+
+  static String eventShareUrl(String joinCode) =>
+      'https://nyotapay.vercel.app/join/$joinCode';
 
   // ---------------- Dashboard ----------------
 

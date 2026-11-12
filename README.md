@@ -39,9 +39,10 @@ Nyota/
 ## 1. Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the three migration files in order:
-   `0001_schema.sql` → `0002_rls.sql` → `0003_storage.sql`.
+2. Open **SQL Editor** and run the migration files in order:
+   `0001_schema.sql` → `0002_rls.sql` → `0003_storage.sql` → `0004_event_sharing.sql`.
    (Or use the Supabase CLI: `supabase db push` with these files in `supabase/migrations/`.)
+   - `0004_event_sharing.sql` adds event join code, members, collaborative access, and `join_event_by_code` RPC (required for QR/code/share-link join).
 3. From **Project Settings → API** copy:
    - `Project URL`  → `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL`
    - `anon / public` key → `SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -54,7 +55,7 @@ Note: users sign up through the app; for fast event use you can disable email co
 ### Database model
 
 - `profiles` — mirrors `auth.users` (auto-created by trigger).
-- `events` — one owner has many events.
+- `events` — has `join_code` for sharing/joining; owner and joined members collaborate on the event.
 - `guest_entries` — every contribution row. `category` is `nyota_gifts` or `food_only`. Money is stored as `NUMERIC(12,2)`.
 - `gifts` — physical gifts linked to an entry, each with an optional Storage `image_path`.
 - `client_id` (uuid, unique) on entries/gifts lets a retried save never create duplicates.
