@@ -168,11 +168,13 @@ create policy "events_select_member" on public.events
 
 -- GUEST ENTRIES: any event member can CRUD entries in the event
 drop policy if exists "entries_select_own" on public.guest_entries;
+drop policy if exists "entries_select_member" on public.guest_entries;
 create policy "entries_select_member" on public.guest_entries
   for select to authenticated
   using (public.is_event_member(event_id));
 
 drop policy if exists "entries_insert_own" on public.guest_entries;
+drop policy if exists "entries_insert_member" on public.guest_entries;
 create policy "entries_insert_member" on public.guest_entries
   for insert to authenticated
   with check (
@@ -181,6 +183,7 @@ create policy "entries_insert_member" on public.guest_entries
   );
 
 drop policy if exists "entries_update_own" on public.guest_entries;
+drop policy if exists "entries_update_member" on public.guest_entries;
 create policy "entries_update_member" on public.guest_entries
   for update to authenticated
   using (public.is_event_member(event_id))
@@ -190,12 +193,14 @@ create policy "entries_update_member" on public.guest_entries
   );
 
 drop policy if exists "entries_delete_own" on public.guest_entries;
+drop policy if exists "entries_delete_member" on public.guest_entries;
 create policy "entries_delete_member" on public.guest_entries
   for delete to authenticated
   using (public.is_event_member(event_id));
 
 -- GIFTS: any event member can CRUD gifts for entries in the event
 drop policy if exists "gifts_select_own" on public.gifts;
+drop policy if exists "gifts_select_member" on public.gifts;
 create policy "gifts_select_member" on public.gifts
   for select to authenticated
   using (
@@ -206,6 +211,7 @@ create policy "gifts_select_member" on public.gifts
   );
 
 drop policy if exists "gifts_insert_own" on public.gifts;
+drop policy if exists "gifts_insert_member" on public.gifts;
 create policy "gifts_insert_member" on public.gifts
   for insert to authenticated
   with check (
@@ -217,6 +223,7 @@ create policy "gifts_insert_member" on public.gifts
   );
 
 drop policy if exists "gifts_update_own" on public.gifts;
+drop policy if exists "gifts_update_member" on public.gifts;
 create policy "gifts_update_member" on public.gifts
   for update to authenticated
   using (
@@ -234,6 +241,7 @@ create policy "gifts_update_member" on public.gifts
   );
 
 drop policy if exists "gifts_delete_own" on public.gifts;
+drop policy if exists "gifts_delete_member" on public.gifts;
 create policy "gifts_delete_member" on public.gifts
   for delete to authenticated
   using (
