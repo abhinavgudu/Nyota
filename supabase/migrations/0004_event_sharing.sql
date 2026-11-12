@@ -73,12 +73,13 @@ create index if not exists event_members_user_idx on public.event_members (user_
 alter table public.event_members enable row level security;
 
 -- Members can see their own membership rows; owners can see members of their events.
+-- Uses the SECURITY DEFINER helper so `events` RLS is not re-evaluated (no recursion).
 drop policy if exists "event_members_select" on public.event_members;
 create policy "event_members_select" on public.event_members
   for select to authenticated
   using (
     user_id = auth.uid()
-    or exists (select 1 from public.events e where e.id = event_id and e.owner_id = auth.uid())
+    or public.is_event_owner(event_id)
   );
 
 -- Users can add themselves as members (join); actual code validation is done by RPC.
@@ -93,11 +94,13 @@ create policy "event_members_delete" on public.event_members
   for delete to authenticated
   using (
     user_id = auth.uid()
-    or exists (select 1 from public.events e where e.id = event_id and e.owner_id = auth.uid())
+    or public.is_event_owner(event_id)
   );
 
 -- 3) Helper: is the current user owner or member of this event?
-create or replace function public.is_event_member (p_event_id uuid)
+-- SECURITY DEFINER so the internal reads bypass RLS. This is what breaks the
+-- policy cycle between `events` and `event_members` (42P17 infinite recursion).
+create or replace function public.is_event_owner (p_event_id uuid)
 returns boolean
 language sql
 stable
@@ -107,11 +110,25 @@ as $$
   select exists (
     select 1 from public.events e
     where e.id = p_event_id and e.owner_id = auth.uid()
-  ) or exists (
-    select 1 from public.event_members m
-    where m.event_id = p_event_id and m.user_id = auth.uid()
   );
 $$;
+
+create or replace function public.is_event_member (p_event_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.is_event_owner(p_event_id)
+    or exists (
+      select 1 from public.event_members m
+      where m.event_id = p_event_id and m.user_id = auth.uid()
+    );
+$$;
+
+grant execute on function public.is_event_owner (uuid) to authenticated;
+grant execute on function public.is_event_member (uuid) to authenticated;
 
 -- 4) Join an event by its share code (returns the event)
 create or replace function public.join_event_by_code (p_code text)
@@ -158,10 +175,7 @@ drop policy if exists "events_select_own" on public.events;
 drop policy if exists "events_select_member" on public.events;
 create policy "events_select_member" on public.events
   for select to authenticated
-  using (
-    owner_id = auth.uid()
-    or exists (select 1 from public.event_members m where m.event_id = id and m.user_id = auth.uid())
-  );
+  using (public.is_event_member(id));
 
 -- Only owner can update/delete their event (keep strict)
 -- events_insert_own, events_update_own, events_delete_own remain as-is.
