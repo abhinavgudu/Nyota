@@ -58,10 +58,20 @@ class NyotaService {
   }
 
   static Future<NyotaEvent> joinEventByCode(String code) async {
-    final data = await _client.rpc('join_event_by_code', params: {
+    final res = await _client.rpc('join_event_by_code', params: {
       'p_code': code.trim().toUpperCase(),
     });
-    return NyotaEvent.fromMap(Map<String, dynamic>.from(data as Map));
+    final Map<String, dynamic> map;
+    if (res is List) {
+      final first = res.isNotEmpty ? res.first : null;
+      map = first is Map ? Map<String, dynamic>.from(first) : <String, dynamic>{};
+    } else if (res is Map) {
+      map = Map<String, dynamic>.from(res);
+    } else {
+      map = <String, dynamic>{};
+    }
+    if (map.isEmpty) throw Exception('Invalid event code');
+    return NyotaEvent.fromMap(map);
   }
 
   static String eventShareUrl(String joinCode) =>
@@ -70,9 +80,20 @@ class NyotaService {
   // ---------------- Dashboard ----------------
 
   static Future<DashboardTotals> dashboardTotals(String eventId) async {
-    final map = await _client
+    final res = await _client
         .rpc('get_dashboard_totals', params: {'p_event_id': eventId});
-    return DashboardTotals.fromMap(Map<String, dynamic>.from(map as Map));
+    // PostgREST returns a LIST for `returns table` functions and a MAP for
+    // scalar/json functions. Accept both so this never breaks.
+    final Map<String, dynamic> map;
+    if (res is List) {
+      final first = res.isNotEmpty ? res.first : null;
+      map = first is Map ? Map<String, dynamic>.from(first) : <String, dynamic>{};
+    } else if (res is Map) {
+      map = Map<String, dynamic>.from(res);
+    } else {
+      map = <String, dynamic>{};
+    }
+    return DashboardTotals.fromMap(map);
   }
 
   // ---------------- Entries ----------------
