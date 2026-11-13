@@ -132,8 +132,11 @@ begin
 end $$;
 
 -- owner / member checks (SECURITY DEFINER so RLS policies never recurse) -----
+-- NOTE: these must be VOLATILE. A STABLE function uses the statement snapshot,
+-- in which a just-inserted row is not visible yet -> "INSERT ... RETURNING"
+-- would fail with 42501 for the owner.
 create or replace function public.is_event_owner(p_event_id uuid)
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language sql volatile security definer set search_path = public as $$
   select exists (
     select 1 from public.events e
     where e.id = p_event_id and e.owner_id = auth.uid()
@@ -141,7 +144,7 @@ returns boolean language sql stable security definer set search_path = public as
 $$;
 
 create or replace function public.is_event_member(p_event_id uuid)
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language sql volatile security definer set search_path = public as $$
   select public.is_event_owner(p_event_id)
       or exists (
         select 1 from public.event_members m
@@ -251,7 +254,8 @@ create policy "profiles_insert_own" on public.profiles
 
 -- EVENTS --------------------------------------------------------------------
 create policy "events_select_member" on public.events
-  for select to authenticated using (public.is_event_member(id));
+  for select to authenticated
+  using (owner_id = auth.uid() or public.is_event_member(id));
 create policy "events_insert_own" on public.events
   for insert to authenticated with check (owner_id = auth.uid());
 create policy "events_update_own" on public.events
@@ -269,7 +273,7 @@ create policy "event_members_delete" on public.event_members
 
 -- GUEST ENTRIES -------------------------------------------------------------
 create policy "entries_select_member" on public.guest_entries
-  for select to authenticated using (public.is_event_member(event_id));
+  for select to authenticated using (owner_id = auth.uid() or public.is_event_member(event_id));
 create policy "entries_insert_member" on public.guest_entries
   for insert to authenticated with check (owner_id = auth.uid() and public.is_event_member(event_id));
 create policy "entries_update_member" on public.guest_entries
@@ -282,7 +286,8 @@ create policy "entries_delete_member" on public.guest_entries
 create policy "gifts_select_member" on public.gifts
   for select to authenticated using (exists (
     select 1 from public.guest_entries ge
-    where ge.id = entry_id and public.is_event_member(ge.event_id)));
+    where ge.id = entry_id
+      and (ge.owner_id = auth.uid() or public.is_event_member(ge.event_id))));
 create policy "gifts_insert_member" on public.gifts
   for insert to authenticated with check (owner_id = auth.uid() and exists (
     select 1 from public.guest_entries ge
