@@ -23,22 +23,32 @@ export default function DashboardPage() {
   const [totals, setTotals] = useState<DashboardTotals | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const ev = await latestEvent();
       setEvent(ev);
-      setTotals(ev ? await dashboardTotals(ev.id) : null);
+      if (ev) {
+        setTotals(await dashboardTotals(ev.id));
+      } else {
+        setTotals(null);
+      }
+      setUpdatedAt(Date.now());
     } catch {
       /* shown as empty state */
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     load();
+    // Live refresh every 2 seconds — entries added from the app or another
+    // counter show up here instantly.
+    const id = setInterval(() => load(true), 2000);
+    return () => clearInterval(id);
   }, [load]);
 
   return (
@@ -93,6 +103,21 @@ export default function DashboardPage() {
             </div>
 
             {event.join_code && <ShareEventCard event={event} />}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'center', marginBottom: 12 }}>
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: 'var(--success)',
+                  display: 'inline-block',
+                }}
+              />
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
+                Live • updated {updatedAt ? `${Math.max(0, Math.round((Date.now() - updatedAt) / 1000))}s ago` : '…'}
+              </span>
+            </div>
 
             {loading || !totals ? (
               <p style={{ color: 'var(--muted)', textAlign: 'center' }}>Loading totals…</p>

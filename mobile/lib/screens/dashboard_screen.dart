@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -23,11 +25,64 @@ class DashboardScreenState extends State<DashboardScreen> {
   NyotaEvent? _event;
   DashboardTotals? _totals;
   bool _loading = true;
+  bool _polling = false;
+  DateTime? _lastUpdated;
+  Timer? _liveTimer;
 
   @override
   void initState() {
     super.initState();
     refresh();
+    // Live refresh every 2 seconds so the host sees the latest totals without
+    // reopening the app (other counters / website entries appear instantly).
+    _liveTimer = Timer.periodic(const Duration(seconds: 2), (_) => _silentRefresh());
+  }
+
+  @override
+  void dispose() {
+    _liveTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Background refresh — no spinner, no error snackbar, no screen jump.
+  Future<void> _silentRefresh() async {
+    if (_polling) return;
+    // Only poll while this tab is the visible one (IndexedStack disables the
+    // ticker of hidden tabs) — saves battery and requests.
+    if (!mounted || !TickerMode.of(context)) return;
+    _polling = true;
+    try {
+      final event = await NyotaService.latestEvent();
+      if (event == null) {
+        if (mounted && _event != null) {
+          setState(() {
+            _event = null;
+            _totals = null;
+            _lastUpdated = DateTime.now();
+          });
+        }
+        return;
+      }
+      final totals = await NyotaService.dashboardTotals(event.id);
+      if (!mounted) return;
+      final changed = _event?.id != event.id ||
+          _totals?.totalGuests != totals.totalGuests ||
+          _totals?.totalCash != totals.totalCash ||
+          _totals?.totalGifts != totals.totalGifts;
+      if (changed || _lastUpdated == null) {
+        setState(() {
+          _event = event;
+          _totals = totals;
+          _lastUpdated = DateTime.now();
+        });
+      } else {
+        setState(() => _lastUpdated = DateTime.now());
+      }
+    } catch (_) {
+      // Keep the last good data; the next tick tries again.
+    } finally {
+      _polling = false;
+    }
   }
 
   String? _error;
@@ -53,6 +108,7 @@ class DashboardScreenState extends State<DashboardScreen> {
           _event = event;
           _totals = totals;
           _loading = false;
+          _lastUpdated = DateTime.now();
         });
       }
     } catch (e) {
@@ -166,7 +222,9 @@ class DashboardScreenState extends State<DashboardScreen> {
             const Center(child: CircularProgressIndicator())
           else ...[
             _StatGrid(t: t, money: _money),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
+            _LiveBadge(lastUpdated: _lastUpdated),
+            const SizedBox(height: 6),
             if (_event!.joinCode != null && _event!.joinCode!.isNotEmpty)
               _ShareJoinCard(event: _event!),
             const SizedBox(height: 16),
@@ -188,6 +246,37 @@ class DashboardScreenState extends State<DashboardScreen> {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _LiveBadge extends StatelessWidget {
+  const _LiveBadge({required this.lastUpdated});
+  final DateTime? lastUpdated;
+
+  @override
+  Widget build(BuildContext context) {
+    final ago = lastUpdated == null
+        ? '…'
+        : '${DateTime.now().difference(lastUpdated!).inSeconds}s ago';
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(color: NyotaColors.success, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          'Live • updated $ago',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: NyotaColors.muted,
+          ),
+        ),
+      ],
     );
   }
 }

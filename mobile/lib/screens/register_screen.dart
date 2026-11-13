@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -28,6 +30,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _hasMore = true;
   String? _error;
   String _search = '';
+  bool _polling = false;
+  Timer? _liveTimer;
 
   @override
   void initState() {
@@ -38,13 +42,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _loadMore();
       }
     });
+    // Live refresh every 2 seconds: new entries from any counter / the website
+    // show up instantly without reopening the app.
+    _liveTimer = Timer.periodic(const Duration(seconds: 2), (_) => _silentRefresh());
   }
 
   @override
   void dispose() {
+    _liveTimer?.cancel();
     _searchCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  /// Background refresh of the first page — keeps the search filter and any
+  /// extra pages already loaded.
+  Future<void> _silentRefresh() async {
+    if (_polling) return;
+    // Only poll while this tab is visible (IndexedStack disables hidden tabs).
+    if (!mounted || !TickerMode.of(context)) return;
+    _polling = true;
+    try {
+      final event = await NyotaService.latestEvent();
+      if (event == null) return;
+      final fresh = await NyotaService.fetchEntries(
+        event.id,
+        search: _search,
+        limit: 50,
+        offset: 0,
+      );
+      if (!mounted) return;
+      final merged = List<GuestEntry>.from(fresh);
+      final seen = fresh.map((e) => e.id).toSet();
+      for (final e in _entries) {
+        if (!seen.contains(e.id)) merged.add(e);
+      }
+      setState(() {
+        _entries = merged;
+        _hasMore = fresh.length >= 50;
+        _error = null;
+      });
+    } catch (_) {
+      // Keep the current list; the next tick retries.
+    } finally {
+      _polling = false;
+    }
   }
 
   Future<void> _refresh() async {
@@ -164,6 +206,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   suffixIconConstraints: const BoxConstraints(minWidth: 80, minHeight: 48),
                 ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 16, bottom: 6),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(color: NyotaColors.success, shape: BoxShape.circle),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Live • auto-refresh every 2s',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: NyotaColors.muted),
+                  ),
+                ],
               ),
             ),
             Expanded(

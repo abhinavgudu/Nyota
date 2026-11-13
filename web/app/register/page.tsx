@@ -40,8 +40,8 @@ export default function RegisterPage() {
   };
 
   const load = useCallback(
-    async (searchTerm: string) => {
-      setLoading(true);
+    async (searchTerm: string, silent = false) => {
+      if (!silent) setLoading(true);
       try {
         const ev = await latestEvent();
         setEvent(ev);
@@ -54,9 +54,9 @@ export default function RegisterPage() {
         setEntries(rows);
         setHasMore(rows.length >= PAGE_SIZE);
       } catch {
-        showToast('Could not load entries.', true);
+        if (!silent) showToast('Could not load entries.', true);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     []
@@ -64,7 +64,13 @@ export default function RegisterPage() {
 
   useEffect(() => {
     load('');
-  }, [load]);
+    // Live refresh every 2 seconds (paused while a modal is open so an open
+    // edit form is never overwritten).
+    const id = setInterval(() => {
+      if (!selected) load(search, true);
+    }, 2000);
+    return () => clearInterval(id);
+  }, [load, search, selected]);
 
   function onSearch(v: string) {
     setSearch(v);
@@ -123,6 +129,27 @@ export default function RegisterPage() {
           <button className="btn danger" onClick={exportPdf} disabled={!event}>
             Export PDF
           </button>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--muted)',
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: 'var(--success)',
+                display: 'inline-block',
+              }}
+            />
+            Live • auto-refresh 2s
+          </span>
         </div>
 
         {loading ? (
